@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:sap="http://www.mulesoft.org/schema/mule/sap" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+	http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+	http://www.mulesoft.org/schema/mule/sap http://www.mulesoft.org/schema/mule/sap/current/mule-sap.xsd">
+
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+  <flow name="sapToSalesforceFlow">
+	http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+    <sap:synchronous-remote-function-call key="READ_SAP_DATA" doc:name="Read SAP Data" doc:id="1" config-ref="SAP_Config">
+      <sap:content>
+        <![CDATA[#[#[%dw 2.0
+            output application/xml
+            ---
+            {
+                READ_SAP_DATA: {
+                    "import": {
+                        "IV_OBJECT": "SALES",
+                        "IV_SYS": "SAP"
+                    }
+                }
+            }]]]>
+      </sap:content>
+    </sap:synchronous-remote-function-call>
+    <salesforce:update config-ref="Salesforce_Config" doc:name="Update Salesforce" doc:id="2">
+      <salesforce:records>
+            #[{
+                "Name": "New Account",
+                "Description": "Updated from SAP"
+            }]
+        </salesforce:records>
+    </salesforce:update>
+  </flow>
+</mule>
